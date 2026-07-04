@@ -1,0 +1,36 @@
+# Semgrep configuration for C# security scanning
+# This configuration file specifies which security rules to apply
+
+rules:
+  - id: csharp-sql-injection
+    patterns:
+      - pattern: |
+          $QUERY = $FMT"...{...}..."
+          ...
+          SqlCommand(...$QUERY...)
+    message: Potential SQL injection vulnerability detected
+    languages: [csharp]
+    severity: ERROR
+  
+  - id: csharp-command-injection
+    patterns:
+      - pattern: ProcessStartInfo(...$CMD...)
+      - pattern: Process.Start(...$INPUT...)
+    message: Potential command injection vulnerability
+    languages: [csharp]
+    severity: ERROR
+
+  - id: csharp-hardcoded-secrets
+    patterns:
+      - pattern-either:
+          - pattern: |
+              password = "..."
+          - pattern: |
+              secret = "..."
+          - pattern: |
+              token = "..."
+          - pattern: |
+              api_key = "..."
+    message: Hardcoded secret detected
+    languages: [csharp]
+    severity: WARNING

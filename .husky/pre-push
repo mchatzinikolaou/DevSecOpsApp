@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Pre-push hook for DevSecOpsApp
+# Runs more extensive security checks before allowing push to remote
+
+set -e
+
+echo "Running pre-push security checks..."
+
+# Get the current branch
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+REMOTE="origin"
+
+echo "Checking commits on branch: $BRANCH"
+
+# 1. Check all commits being pushed for secrets
+echo "Scanning commits for exposed secrets..."
+COMMITS=$(git log $REMOTE/$BRANCH..HEAD --oneline | wc -l)
+
+if [ $COMMITS -gt 0 ]; then
+    echo "Found $COMMITS commits to push"
+    
+    # Simple check: look for common secret patterns in commit diffs
+    if git diff $REMOTE/$BRANCH..HEAD | grep -E "(password|secret|api[_-]?key|token|privatekey|aws_access|client_secret)" -i > /dev/null 2>&1; then
+        echo "? Potential secrets detected in commits. Please remove before pushing."
+        exit 1
+    fi
+fi
+
+echo "? Pre-push security checks passed"
+echo "Proceeding with push..."

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Pre-commit hook for DevSecOpsApp
+# Runs quick local security checks and linting before allowing commits
+
+set -e
+
+echo "Running pre-commit security checks..."
+
+# 1. Check for secrets using TruffleHog patterns (basic regex)
+echo "Checking for hardcoded secrets..."
+
+# Pattern matching for common secrets
+if git diff --cached | grep -E "(password|secret|api[_-]?key|token|credential)" -i | grep -E "['\"]?[a-zA-Z0-9!@#$%^&*]{8,}['\"]?" > /dev/null; then
+    echo "??  Warning: Potential hardcoded secrets detected in staged changes"
+    echo "   Please review and remove sensitive data before committing"
+    # Note: This is a warning only, uncomment the line below to enforce
+    # exit 1
+fi
+
+# 2. Check for suspicious patterns in C# code
+echo "Checking for suspicious code patterns..."
+
+if git diff --cached --name-only | grep -E "\.(cs|csproj|json)$" | while read file; do
+    if [ -f "$file" ]; then
+        # Check for Process.Start (command injection risk)
+        if grep -i "process\.start" "$file" 2>/dev/null; then
+            echo "??  Warning: Process.Start detected in $file (Command Injection risk)"
+        fi
+        # Check for concatenated SQL queries
+        if grep -E "\$\".*SELECT.*WHERE.*{" "$file" 2>/dev/null | grep -v "VULNERABILITY" > /dev/null; then
+            echo "??  Warning: Potential SQL injection pattern in $file"
+        fi
+    fi
+done; then
+    :
+fi
+
+# 3. Run dotnet format check (optional - requires dotnet format installed)
+if command -v dotnet &> /dev/null; then
+    echo "Running code formatting checks..."
+    dotnet format --verify-no-changes --verbosity quiet 2>/dev/null || true
+fi
+
+echo "? Pre-commit checks completed"

