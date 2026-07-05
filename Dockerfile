@@ -1,8 +1,12 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
-# INTENTIONAL VULNERABILITY: Using outdated .NET 5.0 which is EOL
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
+# UPDATE: Using .NET 8.0 instead of 5.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+
+# Install sqlite3 for database initialization
+RUN apt-get update && apt-get install -y sqlite3 && rm -rf /var/lib/apt/lists/*
+
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
@@ -27,4 +31,6 @@ RUN dotnet publish "./DevSecOpsApp.csproj" -c $BUILD_CONFIGURATION -o /app/publi
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY init-db.sql .
+RUN sqlite3 app.db < init-db.sql
 ENTRYPOINT ["dotnet", "DevSecOpsApp.dll"]
