@@ -1,0 +1,30 @@
+#!/bin/bash
+# Pre-push hook: Comprehensive security and build checks
+
+echo "Pre-push: Verifying build, dependencies, and security..."
+
+# Check if dotnet is available
+if ! command -v dotnet &> /dev/null; then
+    echo "dotnet CLI not found, skipping build check"
+    exit 0
+fi
+
+# Check 1: Build verification
+echo "Building application..."
+dotnet build --nologo -q 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "BLOCKED: Build failed! Fix compilation errors before pushing."
+    exit 1
+fi
+
+# Check 2: Dependency vulnerability scan
+echo "Scanning for vulnerable dependencies..."
+if command -v dotnet &> /dev/null; then
+    VULNCOUNT=$(dotnet list package --vulnerable 2>/dev/null | grep -c "detected")
+    if [ "$VULNCOUNT" -gt 0 ]; then
+        echo "WARNING: Vulnerable dependencies detected!"
+    fi
+fi
+
+echo "Pre-push checks passed"
+exit 0
