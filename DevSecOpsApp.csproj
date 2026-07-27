@@ -11,11 +11,6 @@
 </PropertyGroup>
 
   <ItemGroup>
-    <None Include=".husky\pre-commit" />
-    <None Include=".husky\pre-push" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.23" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.9" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1-Preview.1" />
