@@ -26,13 +26,13 @@ pipeline {
                     # 1. Dependency Scan (using Docker with .NET SDK) - specify the project file
                     docker run --rm -v ${WORKSPACE}:/app -w /app mcr.microsoft.com/dotnet/sdk:8.0 dotnet list DevSecOpsApp.csproj package --vulnerable --include-transitive > ${REPORT_DIR}/dependencies.txt 2>&1 || true
 
-                    # 2. Semgrep (Code Analysis) - scan C# files with proper patterns
-                    docker run --rm -v ${WORKSPACE}:/src returntocorp/semgrep:latest semgrep --config=p/csharp --config=p/security-audit --config=p/owasp-top-ten /src --include="*.cs" --exclude=".vs" --exclude="obj" --exclude="bin" --exclude="temp" --json > ${REPORT_DIR}/semgrep.json 2>&1 || true
-                    docker run --rm -v ${WORKSPACE}:/src returntocorp/semgrep:latest semgrep --config=p/csharp --config=p/security-audit --config=p/owasp-top-ten /src --include="*.cs" --exclude=".vs" --exclude="obj" --exclude="bin" --exclude="temp" > ${REPORT_DIR}/semgrep.txt 2>&1 || true
+                    # 2. Semgrep (Code Analysis) - scan C# files explicitly without git dependency
+                    docker run --rm -v ${WORKSPACE}:/src returntocorp/semgrep:latest semgrep scan --config=p/csharp --config=p/security-audit --config=p/owasp-top-ten /src --include="*.cs" --exclude="*.Designer.cs" --exclude=".vs" --exclude="obj" --exclude="bin" --exclude="temp" --no-git-ignore --json > ${REPORT_DIR}/semgrep.json 2>&1 || true
+                    docker run --rm -v ${WORKSPACE}:/src returntocorp/semgrep:latest semgrep scan --config=p/csharp --config=p/security-audit --config=p/owasp-top-ten /src --include="*.cs" --exclude="*.Designer.cs" --exclude=".vs" --exclude="obj" --exclude="bin" --exclude="temp" --no-git-ignore > ${REPORT_DIR}/semgrep.txt 2>&1 || true
 
-                    # 3. TruffleHog (Secret Detection) - scan git repo
-                    docker run --rm -v ${WORKSPACE}/.git:/repo/.git:ro -v ${WORKSPACE}:/repo:ro -w /repo trufflesecurity/trufflehog:latest git file://. --json > ${REPORT_DIR}/trufflehog.json 2>&1 || true
-                    docker run --rm -v ${WORKSPACE}/.git:/repo/.git:ro -v ${WORKSPACE}:/repo:ro -w /repo trufflesecurity/trufflehog:latest git file://. > ${REPORT_DIR}/trufflehog.txt 2>&1 || true
+                    # 3. TruffleHog (Secret Detection) - scan filesystem directly
+                    docker run --rm -v ${WORKSPACE}:/src:ro trufflesecurity/trufflehog:latest filesystem /src --exclude-paths=/src/.vs --exclude-paths=/src/obj --exclude-paths=/src/bin --exclude-paths=/src/temp --json > ${REPORT_DIR}/trufflehog.json 2>&1 || true
+                    docker run --rm -v ${WORKSPACE}:/src:ro trufflesecurity/trufflehog:latest filesystem /src --exclude-paths=/src/.vs --exclude-paths=/src/obj --exclude-paths=/src/bin --exclude-paths=/src/temp > ${REPORT_DIR}/trufflehog.txt 2>&1 || true
                 '''
             }
         }
