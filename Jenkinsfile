@@ -54,7 +54,7 @@ pipeline {
                     docker run --rm --network host networkstatic/nmap:latest nmap -sV -p- localhost > ${REPORT_DIR}/nmap.txt 2>&1 || true
                     
                     # 2. sqlmap (SQL Injection Testing)
-                    docker run --rm --network host sqlmap/sqlmap:latest sqlmap.py --batch -u "http://localhost:8080/api/login" --method POST --data '{"Username":"admin", "Password":"password"}' --headers "Content-Type: application/json" > ${REPORT_DIR}/sqlmap.txt 2>&1 || true
+                    docker run --rm --network host secsi/sqlmap:latest sqlmap.py --batch -u "http://localhost:8080/api/login" --method POST --data '{"Username":"admin", "Password":"password"}' --headers "Content-Type: application/json" > ${REPORT_DIR}/sqlmap.txt 2>&1 || true
                 '''
             }
         }
