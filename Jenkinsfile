@@ -1,4 +1,4 @@
-pipeline {
+﻿pipeline {
     agent any
 
     options {
@@ -108,7 +108,7 @@ pipeline {
                                      -t ${DOCKER_IMAGE_NAME}:latest \
                                      -f Dockerfile .
                         
-                        echo "? Docker image built successfully: ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                        echo " Docker image built successfully: ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
                     '''
                 }
             }
@@ -160,7 +160,7 @@ pipeline {
                         echo "Waiting for application to start..."
                         for i in {1..30}; do
                             if curl -s http://localhost:8080/swagger/index.html > /dev/null; then
-                                echo "? Application is ready"
+                                echo "Application is ready"
                                 break
                             fi
                             echo "  Attempt $i/30: Waiting for application..."
@@ -229,7 +229,7 @@ EOF
                             -r ${REPORT_DIR}/zap-findings.html \
                             || true
                         
-                        echo "? OWASP ZAP scan completed"
+                        echo "OWASP ZAP scan completed"
                     '''
                 }
             }
@@ -258,7 +258,7 @@ EOF
                             --json-report=${REPORT_DIR}/sqlmap-report.json \
                             >> ${REPORT_DIR}/sqlmap-findings.txt 2>&1 || true
                         
-                        echo "? SQL Injection testing completed"
+                        echo "SQL Injection testing completed"
                         cat ${REPORT_DIR}/sqlmap-findings.txt
                     '''
                 }
@@ -271,7 +271,7 @@ EOF
                     echo "Stage: Cleaning up containers..."
                     sh '''
                         docker-compose down || true
-                        echo "? Cleanup completed"
+                        echo "Cleanup completed"
                     '''
                 }
             }
@@ -354,7 +354,7 @@ The following vulnerabilities are **intentionally introduced** for testing purpo
 All detailed reports and logs are available in the reports directory.
 EOF
                         
-                        echo "? Summary report generated"
+                        echo "Summary report generated"
                         cat ${REPORT_DIR}/SECURITY_REPORT.md
                     '''
                 }
@@ -379,10 +379,10 @@ EOF
             }
         }
         success {
-            echo "? Build and security scan completed"
+            echo "Build and security scan completed"
         }
         failure {
-            echo "? Build or security scan failed - review reports"
+            echo "Build or security scan failed - review reports"
         }
     }
 }
