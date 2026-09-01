@@ -70,7 +70,7 @@ pipeline {
             echo "Archiving reports and tearing down containers..."
             archiveArtifacts artifacts: 'reports/*', allowEmptyArchive: true
             
-            sh 'docker-compose down || true'
+            sh 'docker compose down || true'
         }
         success {
             echo "Pipeline completed successfully!"
