@@ -41,8 +41,8 @@ pipeline {
             steps {
                 echo "Building and spinning up the environment..."
                 sh '''
-                    docker-compose down || true
-                    docker-compose up -d --build
+                    docker compose down || true
+                    docker compose up -d --build
                     sleep 15
                 '''
             }
